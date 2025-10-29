@@ -1,14 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
-
-/**
- * @title CryptexFlowSystems
- * @dev A decentralized payment streaming and escrow management system
- * @notice This contract enables continuous payment flows and secure fund management
- */
-contract CryptexFlowSystems {
-    
-    // Structs
+Structs
     struct PaymentStream {
         address sender;
         address recipient;
@@ -28,13 +18,7 @@ contract CryptexFlowSystems {
         uint256 deadline;
     }
     
-    // State variables
-    mapping(uint256 => PaymentStream) public paymentStreams;
-    mapping(uint256 => Escrow) public escrows;
-    uint256 public streamCounter;
-    uint256 public escrowCounter;
-    
-    // Events
+    Events
     event StreamCreated(uint256 indexed streamId, address indexed sender, address indexed recipient, uint256 amount, uint256 duration);
     event StreamWithdrawn(uint256 indexed streamId, address indexed recipient, uint256 amount);
     event StreamCancelled(uint256 indexed streamId, uint256 refundAmount);
@@ -42,59 +26,7 @@ contract CryptexFlowSystems {
     event EscrowReleased(uint256 indexed escrowId, uint256 amount);
     event EscrowRefunded(uint256 indexed escrowId, uint256 amount);
     
-    // Modifiers
-    modifier streamExists(uint256 streamId) {
-        require(streamId < streamCounter, "Stream does not exist");
-        _;
-    }
-    
-    modifier escrowExists(uint256 escrowId) {
-        require(escrowId < escrowCounter, "Escrow does not exist");
-        _;
-    }
-    
-    /**
-     * @dev Creates a new payment stream
-     * @param recipient Address that will receive the streamed payments
-     * @param duration Duration of the stream in seconds
-     * @notice Sender must send ETH with this transaction
-     */
-    function createPaymentStream(address recipient, uint256 duration) external payable returns (uint256) {
-        require(recipient != address(0), "Invalid recipient address");
-        require(msg.value > 0, "Must send ETH to create stream");
-        require(duration > 0, "Duration must be greater than zero");
-        
-        uint256 streamId = streamCounter++;
-        
-        paymentStreams[streamId] = PaymentStream({
-            sender: msg.sender,
-            recipient: recipient,
-            totalAmount: msg.value,
-            startTime: block.timestamp,
-            duration: duration,
-            withdrawnAmount: 0,
-            active: true
-        });
-        
-        emit StreamCreated(streamId, msg.sender, recipient, msg.value, duration);
-        return streamId;
-    }
-    
-    /**
-     * @dev Allows recipient to withdraw available streamed funds
-     * @param streamId ID of the payment stream
-     */
-    function withdrawFromStream(uint256 streamId) external streamExists(streamId) {
-        PaymentStream storage stream = paymentStreams[streamId];
-        require(msg.sender == stream.recipient, "Only recipient can withdraw");
-        require(stream.active, "Stream is not active");
-        
-        uint256 availableAmount = getAvailableBalance(streamId);
-        require(availableAmount > 0, "No funds available to withdraw");
-        
-        stream.withdrawnAmount += availableAmount;
-        
-        // Check if stream is completed
+    Check if stream is completed
         if (block.timestamp >= stream.startTime + stream.duration) {
             stream.active = false;
         }
@@ -255,3 +187,6 @@ contract CryptexFlowSystems {
         );
     }
 }
+// 
+update
+// 
