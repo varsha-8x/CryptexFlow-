@@ -1,27 +1,37 @@
-# TokenAuditTrail: Immutable Record of Token Transactions for Compliance
+Project Title : CryptexFlow
+Project Description
 
-## Project Description
-TokenAuditTrail is a Solidity smart contract designed to provide a secure, immutable ledger of token transactions specifically tailored for compliance auditing purposes. The contract records every token transfer with detailed information including sender, receiver, amount, timestamp, and the originating transaction hash. This transparency and immutability help organizations comply with regulatory requirements by providing a verifiable transaction audit trail on-chain.
+CryptexFlow is a decentralized liquidity streaming smart contract that allows users to deposit, stream, and withdraw Ether continuously over time. It eliminates the need for intermediaries, ensuring transparent, real-time, and automated payment flows between parties on the blockchain.
 
-## Project Vision
-Our vision is to empower blockchain projects, financial institutions, and regulatory bodies with an accessible and tamper-proof token transaction log that enhances trust, accountability, and compliance in decentralized ecosystems. TokenAuditTrail aims to be the go-to compliance layer that integrates seamlessly with any token system, making audits and reporting streamlined and reliable.
+Project Vision
 
-## Key Features
-- **Immutable Transfer Logging:** Every token transfer is logged immutably on-chain, ensuring a permanent record.
-- **Detailed Records:** Logs include sender, recipient, amount, timestamp, and original transaction hash for robust auditing.
-- **Admin-Controlled Logging:** Only authorized admins can log transfers, ensuring data integrity.
-- **On-chain Access:** Transfer records can be accessed via public view functions for transparency.
-- **Event Emission:** Emits events for easy off-chain indexing and monitoring by compliance tools.
-- **Simple Integration:** Designed to work alongside existing token contracts by logging their transfers.
+To revolutionize digital payments by introducing real-time liquidity streaming, enabling continuous, trustless transactions for freelancers, organizations, and decentralized ecosystems. CryptexFlow aims to make time-based payments as simple and secure as sending a message.
 
-## Future Scope
-- Multi-admin role support with customizable permissions.
-- Integration with popular token standards (ERC20, ERC721) for automated transfer detection.
-- Advanced querying and filtering capabilities for audit reports.
-- Off-chain compliance dashboards and alerting systems powered by the contract events.
-- Support for cross-chain transfer logging.
-- Incorporation of cryptographic proofs for enhanced data verification.
+Key Features
 
-## Contract Details
-0xCEa78E18E2C224E4d4B17CD34717468505259128
-![alt text](image.png)
+💧 Real-Time Payment Streams: Send and receive funds continuously over time.
+
+🔐 Trustless Execution: All transactions occur securely through smart contracts.
+
+📊 Transparent Tracking: Every payment stream is verifiable on-chain.
+
+🛡 Admin Management: Admins can manage and cancel active streams if required.
+
+⚡ Instant Withdrawals: Recipients can withdraw the amount proportional to time elapsed.
+
+Future Scope
+
+💱 Integration of ERC20 and stablecoin streaming <img width="922" height="104" alt="Screenshot 2025-11-03 235715" src="https://github.com/user-attachments/assets/279470df-209a-4a24-9e15-0791347e6e4b" />
+support.
+
+🌉 Cross-chain streaming through Layer-2 bridges.
+
+📲 DApp and dashboard interface for stream management.
+
+🧠 AI-based analytics for performance and reliability tracking.
+
+🗳 DAO-based governance for decentralized control.
+
+Contract Address:0xD014832bDCac5cB4b10406e9337E6B414D21725F
+
+![Uploading Screenshot 2025-11-03 235715.png…]()
