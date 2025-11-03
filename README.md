@@ -18,20 +18,26 @@ Key Features
 🛡 Admin Management: Admins can manage and cancel active streams if required.
 
 ⚡ Instant Withdrawals: Recipients can withdraw the amount proportional to time elapsed.
-
 Future Scope
 
-💱 Integration of ERC20 and stablecoin streaming <img width="922" height="104" alt="Screenshot 2025-11-03 235715" src="https://github.com/user-attachments/assets/279470df-209a-4a24-9e15-0791347e6e4b" />
-support.
+💰 Support for multiple ERC20 tokens and stablecoins.
 
-🌉 Cross-chain streaming through Layer-2 bridges.
+📱 Integration with Web3 wallets and DApp dashboards for real-time tracking.
 
-📲 DApp and dashboard interface for stream management.
+🤖 Automated recurring salary or subscription payments.
 
-🧠 AI-based analytics for performance and reliability tracking.
+🌐 Cross-chain liquidity streaming using Layer-2 and interoperability bridges.
 
-🗳 DAO-based governance for decentralized control.
+🧩 Governance and staking features for community-driven enhancements.
 
-Contract Address:0xD014832bDCac5cB4b10406e9337E6B414D21725F
+Contract Address0xD014832bDCac5cB4b10406e9337E6B414D21725F
 
-![Uploading Screenshot 2025-11-03 235715.png…]()
+
+<img width="922" height="104" alt="Screenshot 2025-11-03 235715" src="https://github.com/user-attachments/assets/f5168792-e21a-483f-b5d6-6529ceb3ed71" />
+
+
+
+
+
+
+
