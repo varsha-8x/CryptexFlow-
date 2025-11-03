@@ -1,192 +1,112 @@
-Structs
-    struct PaymentStream {
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.26;
+
+/**
+ * @title CryptexFlow
+ * @notice A decentralized liquidity stream management contract that allows users to
+ *         deposit, stream, and withdraw tokens over time in a trustless manner.
+ */
+contract Project {
+    address public admin;
+    uint256 public streamCount;
+
+    struct Stream {
+        uint256 id;
         address sender;
-        address recipient;
-        uint256 totalAmount;
+        address receiver;
+        uint256 deposit;
+        uint256 ratePerSecond;
         uint256 startTime;
-        uint256 duration;
-        uint256 withdrawnAmount;
+        uint256 stopTime;
         bool active;
     }
-    
-    struct Escrow {
-        address payer;
-        address payee;
-        uint256 amount;
-        bool released;
-        bool refunded;
-        uint256 deadline;
+
+    mapping(uint256 => Stream) public streams;
+
+    event StreamCreated(uint256 indexed id, address indexed sender, address indexed receiver, uint256 deposit, uint256 duration);
+    event StreamCancelled(uint256 indexed id);
+    event Withdrawn(uint256 indexed id, address indexed receiver, uint256 amount);
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can execute this");
+        _;
     }
-    
-    Events
-    event StreamCreated(uint256 indexed streamId, address indexed sender, address indexed recipient, uint256 amount, uint256 duration);
-    event StreamWithdrawn(uint256 indexed streamId, address indexed recipient, uint256 amount);
-    event StreamCancelled(uint256 indexed streamId, uint256 refundAmount);
-    event EscrowCreated(uint256 indexed escrowId, address indexed payer, address indexed payee, uint256 amount, uint256 deadline);
-    event EscrowReleased(uint256 indexed escrowId, uint256 amount);
-    event EscrowRefunded(uint256 indexed escrowId, uint256 amount);
-    
-    Check if stream is completed
-        if (block.timestamp >= stream.startTime + stream.duration) {
-            stream.active = false;
-        }
-        
-        payable(stream.recipient).transfer(availableAmount);
-        emit StreamWithdrawn(streamId, stream.recipient, availableAmount);
+
+    constructor() {
+        admin = msg.sender;
     }
-    
+
     /**
-     * @dev Cancels an active payment stream and refunds remaining balance
-     * @param streamId ID of the payment stream
+     * @notice Create a new streaming payment
+     * @param _receiver Address of the receiver
+     * @param _duration Duration of the stream in seconds
      */
-    function cancelStream(uint256 streamId) external streamExists(streamId) {
-        PaymentStream storage stream = paymentStreams[streamId];
-        require(msg.sender == stream.sender, "Only sender can cancel stream");
-        require(stream.active, "Stream is not active");
-        
-        uint256 availableToRecipient = getAvailableBalance(streamId);
-        uint256 refundToSender = stream.totalAmount - stream.withdrawnAmount - availableToRecipient;
-        
-        stream.active = false;
-        
-        if (availableToRecipient > 0) {
-            stream.withdrawnAmount += availableToRecipient;
-            payable(stream.recipient).transfer(availableToRecipient);
-        }
-        
-        if (refundToSender > 0) {
-            payable(stream.sender).transfer(refundToSender);
-        }
-        
-        emit StreamCancelled(streamId, refundToSender);
-    }
-    
-    /**
-     * @dev Creates an escrow arrangement with a deadline
-     * @param payee Address that will receive funds upon release
-     * @param deadline Timestamp after which funds can be refunded
-     */
-    function createEscrow(address payee, uint256 deadline) external payable returns (uint256) {
-        require(payee != address(0), "Invalid payee address");
-        require(msg.value > 0, "Must send ETH to create escrow");
-        require(deadline > block.timestamp, "Deadline must be in the future");
-        
-        uint256 escrowId = escrowCounter++;
-        
-        escrows[escrowId] = Escrow({
-            payer: msg.sender,
-            payee: payee,
-            amount: msg.value,
-            released: false,
-            refunded: false,
-            deadline: deadline
-        });
-        
-        emit EscrowCreated(escrowId, msg.sender, payee, msg.value, deadline);
-        return escrowId;
-    }
-    
-    /**
-     * @dev Releases escrow funds to the payee
-     * @param escrowId ID of the escrow
-     */
-    function releaseEscrow(uint256 escrowId) external escrowExists(escrowId) {
-        Escrow storage escrow = escrows[escrowId];
-        require(msg.sender == escrow.payer, "Only payer can release escrow");
-        require(!escrow.released && !escrow.refunded, "Escrow already settled");
-        
-        escrow.released = true;
-        payable(escrow.payee).transfer(escrow.amount);
-        
-        emit EscrowReleased(escrowId, escrow.amount);
-    }
-    
-    /**
-     * @dev Refunds escrow funds to payer after deadline
-     * @param escrowId ID of the escrow
-     */
-    function refundEscrow(uint256 escrowId) external escrowExists(escrowId) {
-        Escrow storage escrow = escrows[escrowId];
-        require(msg.sender == escrow.payer, "Only payer can request refund");
-        require(!escrow.released && !escrow.refunded, "Escrow already settled");
-        require(block.timestamp >= escrow.deadline, "Deadline has not passed");
-        
-        escrow.refunded = true;
-        payable(escrow.payer).transfer(escrow.amount);
-        
-        emit EscrowRefunded(escrowId, escrow.amount);
-    }
-    
-    /**
-     * @dev Calculates available balance for a payment stream
-     * @param streamId ID of the payment stream
-     * @return Available amount that can be withdrawn
-     */
-    function getAvailableBalance(uint256 streamId) public view streamExists(streamId) returns (uint256) {
-        PaymentStream memory stream = paymentStreams[streamId];
-        
-        if (!stream.active) {
-            return 0;
-        }
-        
-        uint256 elapsed = block.timestamp - stream.startTime;
-        
-        if (elapsed >= stream.duration) {
-            return stream.totalAmount - stream.withdrawnAmount;
-        }
-        
-        uint256 totalAvailable = (stream.totalAmount * elapsed) / stream.duration;
-        return totalAvailable - stream.withdrawnAmount;
-    }
-    
-    /**
-     * @dev Gets stream details
-     * @param streamId ID of the payment stream
-     */
-    function getStreamDetails(uint256 streamId) external view streamExists(streamId) returns (
-        address sender,
-        address recipient,
-        uint256 totalAmount,
-        uint256 startTime,
-        uint256 duration,
-        uint256 withdrawnAmount,
-        bool active
-    ) {
-        PaymentStream memory stream = paymentStreams[streamId];
-        return (
-            stream.sender,
-            stream.recipient,
-            stream.totalAmount,
-            stream.startTime,
-            stream.duration,
-            stream.withdrawnAmount,
-            stream.active
+    function createStream(address _receiver, uint256 _duration) external payable {
+        require(msg.value > 0, "Deposit required");
+        require(_receiver != address(0), "Invalid receiver");
+        require(_duration > 0, "Invalid duration");
+
+        uint256 ratePerSecond = msg.value / _duration;
+
+        streamCount++;
+        streams[streamCount] = Stream(
+            streamCount,
+            msg.sender,
+            _receiver,
+            msg.value,
+            ratePerSecond,
+            block.timestamp,
+            block.timestamp + _duration,
+            true
         );
+
+        emit StreamCreated(streamCount, msg.sender, _receiver, msg.value, _duration);
     }
-    
+
     /**
-     * @dev Gets escrow details
-     * @param escrowId ID of the escrow
+     * @notice Withdraw available funds from an active stream
+     * @param _id Stream ID
      */
-    function getEscrowDetails(uint256 escrowId) external view escrowExists(escrowId) returns (
-        address payer,
-        address payee,
-        uint256 amount,
-        bool released,
-        bool refunded,
-        uint256 deadline
-    ) {
-        Escrow memory escrow = escrows[escrowId];
-        return (
-            escrow.payer,
-            escrow.payee,
-            escrow.amount,
-            escrow.released,
-            escrow.refunded,
-            escrow.deadline
-        );
+    function withdraw(uint256 _id) external {
+        Stream storage s = streams[_id];
+        require(s.active, "Stream inactive");
+        require(msg.sender == s.receiver, "Only receiver can withdraw");
+
+        uint256 elapsed = block.timestamp - s.startTime;
+        if (block.timestamp > s.stopTime) elapsed = s.stopTime - s.startTime;
+
+        uint256 owed = elapsed * s.ratePerSecond;
+        require(owed <= s.deposit, "No balance available");
+
+        s.deposit -= owed;
+        payable(s.receiver).transfer(owed);
+
+        if (block.timestamp >= s.stopTime) {
+            s.active = false;
+        }
+
+        emit Withdrawn(_id, s.receiver, owed);
+    }
+
+    /**
+     * @notice Cancel an active stream (admin only)
+     * @param _id Stream ID
+     */
+    function cancelStream(uint256 _id) external onlyAdmin {
+        Stream storage s = streams[_id];
+        require(s.active, "Stream already inactive");
+
+        s.active = false;
+        payable(s.sender).transfer(s.deposit);
+
+        emit StreamCancelled(_id);
+    }
+
+    /**
+     * @notice Get details of a stream
+     * @param _id Stream ID
+     */
+    function getStream(uint256 _id) external view returns (Stream memory) {
+        return streams[_id];
     }
 }
-// 
-update
-// 
